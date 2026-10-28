@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">RECORD MANAGEMENT</div><h1>{{ title }}</h1><p class="muted">Fields marked required must be completed.</p></div><a class="btn btn-light" href="{{ back_url }}"><i class="bi bi-arrow-left me-1"></i> Back</a></div>
+<div class="panel-card form-card">
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="row g-3">
+    {% for field in form %}
+      {% if field.type not in ['CSRFTokenField', 'SubmitField'] %}
+        <div class="col-md-{{ 12 if field.type == 'TextAreaField' else 6 }}">
+          {{ field.label(class="form-label") }}
+          {% if field.type == 'BooleanField' %}<div class="form-check">{{ field(class="form-check-input") }}</div>
+          {% elif field.type == 'TextAreaField' %}{{ field(class="form-control", rows="3") }}
+          {% else %}{{ field(class="form-control" if field.type != 'SelectField' else "form-select") }}{% endif %}
+          {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+        </div>
+      {% endif %}
+    {% endfor %}
+    </div>
+    <div class="form-actions">{{ form.submit(class="btn btn-primary") }}<a class="btn btn-light" href="{{ back_url }}">Cancel</a></div>
+  </form>
+</div>
+{% endblock %}

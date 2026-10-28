@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Administrator sign in{% endblock %}
+{% block public_content %}
+<div class="login-layout">
+  <section class="login-intro">
+    <div class="login-emblem"><i class="bi bi-mortarboard-fill"></i></div>
+    <div class="eyebrow">ACADEMIC ADMINISTRATION</div>
+    <h1>Student Management System</h1>
+    <p>A secure workspace to manage student records, courses, attendance and academic results.</p>
+    <div class="login-feature"><i class="bi bi-shield-lock"></i><span>Authorized administrator access</span></div>
+    <div class="login-feature"><i class="bi bi-database-check"></i><span>Database-backed academic records</span></div>
+  </section>
+  <section class="login-card">
+    <div class="eyebrow">WELCOME BACK</div>
+    <h2>Sign in to your account</h2>
+    <p class="muted mb-4">Enter your administrator credentials to continue.</p>
+    {% if form.errors and request.method == 'POST' %}<div class="alert alert-danger" role="alert">Check the highlighted fields and try again.</div>{% endif %}
+    <form method="post" novalidate id="loginForm">
+      {{ form.hidden_tag() }}
+      <div class="mb-3">
+        {{ form.email.label(class="form-label") }}
+        {{ form.email(class="form-control form-control-lg", placeholder="admin@college.edu", autocomplete="username") }}
+        {% for error in form.email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="mb-3">
+        {{ form.password.label(class="form-label") }}
+        <div class="input-group input-group-lg">
+          {{ form.password(class="form-control", placeholder="Enter your password", autocomplete="current-password", id="passwordInput") }}
+          <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Show password"><i class="bi bi-eye"></i></button>
+        </div>
+        {% for error in form.password.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <label class="form-check-label">{{ form.remember(class="form-check-input me-2") }}Remember me</label>
+      </div>
+      {{ form.submit(class="btn btn-primary btn-lg w-100", id="loginSubmit") }}
+      <div id="loginLoading" class="loading-note d-none"><span class="spinner-border spinner-border-sm me-2"></span>Signing in securely…</div>
+    </form>
+    <div class="demo-box">
+      <div class="demo-title"><i class="bi bi-info-circle-fill me-1"></i> Demo account</div>
+      <div><span>Email</span><code>{{ config.DEMO_ADMIN_EMAIL }}</code></div>
+      <div><span>Password</span><code>{{ config.DEMO_ADMIN_PASSWORD }}</code></div>
+      <small>Local academic demonstration only. Change or disable these credentials before deployment.</small>
+    </div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById("togglePassword").addEventListener("click", function () {
+  const field = document.getElementById("passwordInput");
+  const shown = field.type === "text";
+  field.type = shown ? "password" : "text";
+  this.setAttribute("aria-label", shown ? "Show password" : "Hide password");
+  this.innerHTML = shown ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+});
+document.getElementById("loginForm").addEventListener("submit", function () {
+  document.getElementById("loginSubmit").disabled = true;
+  document.getElementById("loginLoading").classList.remove("d-none");
+});
+</script>
+{% endblock %}

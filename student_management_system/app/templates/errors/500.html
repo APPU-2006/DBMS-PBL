@@ -1,0 +1,1 @@
+{% extends "base.html" %}{% block title %}Unexpected error{% endblock %}{% block public_content %}<div class="error-card"><span>500</span><h1>Something went wrong</h1><p>The application could not complete this request. The technical details have been logged.</p><a class="btn btn-primary" href="{{ url_for('index') }}">Try again</a></div>{% endblock %}

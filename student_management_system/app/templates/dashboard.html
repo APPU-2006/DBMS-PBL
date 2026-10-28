@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block breadcrumb %}Overview <span>/ Dashboard</span>{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><div class="eyebrow">CAMPUS OVERVIEW</div><h1>Dashboard</h1><p class="muted">A live snapshot of academic activity.</p></div>
+  <a class="btn btn-primary" href="{{ url_for('students.create_student') }}"><i class="bi bi-plus-lg me-1"></i> Add student</a>
+</div>
+<div class="row g-3 stat-grid">
+  {% set cards = [('Total students', total_students, 'bi-people', 'blue'), ('Active students', active_students, 'bi-person-check', 'green'), ('Courses', total_courses, 'bi-journal-bookmark', 'violet'), ('Departments', total_departments, 'bi-diagram-3', 'orange'), ("Today's attendance", attendance_percent|string ~ '%', 'bi-calendar2-check', 'teal'), ('Exam records', exam_records, 'bi-award', 'rose')] %}
+  {% for title, value, icon, color in cards %}<div class="col-6 col-xl-2"><div class="stat-card"><div class="stat-icon {{ color }}"><i class="bi {{ icon }}"></i></div><div class="stat-label">{{ title }}</div><div class="stat-value">{{ value }}</div></div></div>{% endfor %}
+</div>
+<div class="row g-4 mt-1">
+  <div class="col-xl-7"><div class="panel-card chart-card"><div class="panel-heading"><div><h2>Enrollment by course</h2><p>Current student distribution</p></div><a href="{{ url_for('courses.list_courses') }}">View courses <i class="bi bi-arrow-up-right"></i></a></div>
+    {% if enrollment_labels %}<canvas id="enrollmentChart" height="120" aria-label="Students enrolled by course"></canvas>{% else %}<div class="empty-state"><i class="bi bi-bar-chart"></i><strong>No course data yet</strong><span>Add courses and enroll students to see distribution.</span></div>{% endif %}
+  </div></div>
+  <div class="col-xl-5"><div class="panel-card chart-card"><div class="panel-heading"><div><h2>Attendance trend</h2><p>Present records, last 7 days</p></div><a href="{{ url_for('attendance.list_attendance') }}">Details <i class="bi bi-arrow-up-right"></i></a></div>
+    {% if attendance_values|sum %}<canvas id="attendanceChart" height="160" aria-label="Attendance trend over seven days"></canvas>{% else %}<div class="empty-state"><i class="bi bi-calendar2-week"></i><strong>No attendance recorded</strong><span>Records appear here after attendance is saved.</span></div>{% endif %}
+  </div></div>
+</div>
+<div class="row g-4 mt-1">
+  <div class="col-xl-6"><div class="panel-card"><div class="panel-heading"><div><h2>Recent admissions</h2><p>Latest enrolled students</p></div><a href="{{ url_for('students.list_students') }}">All students <i class="bi bi-arrow-up-right"></i></a></div>
+    {% if recent_students %}<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Student</th><th>Course</th><th>Admission</th></tr></thead><tbody>{% for student in recent_students %}<tr><td><a class="table-primary-link" href="{{ url_for('students.details', student_pk=student.id) }}">{{ student.full_name }}</a><small class="d-block muted">{{ student.student_id }}</small></td><td>{{ student.course.course_code }}</td><td>{{ student.admission_date.strftime('%d %b %Y') }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state"><strong>No students enrolled yet</strong><a href="{{ url_for('students.create_student') }}">Add your first student</a></div>{% endif %}
+  </div></div>
+  <div class="col-xl-6"><div class="panel-card"><div class="panel-heading"><div><h2>Recent examination results</h2><p>Recently recorded marks</p></div><a href="{{ url_for('marks.list_marks') }}">All results <i class="bi bi-arrow-up-right"></i></a></div>
+    {% if recent_marks %}<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Student</th><th>Subject</th><th>Score</th></tr></thead><tbody>{% for mark in recent_marks %}<tr><td>{{ mark.student.full_name }}</td><td>{{ mark.subject_name }}<small class="d-block muted">{{ mark.exam_type }}</small></td><td><strong>{{ mark.marks_obtained }}/{{ mark.maximum_marks }}</strong><small class="d-block muted">{{ '%.1f'|format(mark.percentage) }}% · {{ mark.grade }}</small></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state"><strong>No examination records yet</strong><a href="{{ url_for('marks.create_mark') }}">Record marks</a></div>{% endif %}
+  </div></div>
+</div>
+<div class="quick-actions mt-4"><span class="quick-label">Quick actions</span><a href="{{ url_for('attendance.manage_attendance') }}"><i class="bi bi-calendar-plus"></i> Mark attendance</a><a href="{{ url_for('marks.create_mark') }}"><i class="bi bi-plus-square"></i> Add examination marks</a><a href="{{ url_for('reports.index') }}"><i class="bi bi-file-earmark-text"></i> View reports</a><form method="get" action="{{ url_for('students.list_students') }}" class="quick-search"><i class="bi bi-search"></i><input name="q" type="search" class="form-control form-control-sm" placeholder="Find a student"><button class="btn btn-sm btn-outline-primary">Search</button></form></div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+const enrollmentLabels = {{ enrollment_labels|tojson }};
+const enrollmentValues = {{ enrollment_values|tojson }};
+const attendanceLabels = {{ attendance_labels|tojson }};
+const attendanceValues = {{ attendance_values|tojson }};
+if (document.getElementById("enrollmentChart")) new Chart(document.getElementById("enrollmentChart"), {
+  type: "bar", data: {labels: enrollmentLabels, datasets: [{label: "Students", data: enrollmentValues, backgroundColor: "#167d83", borderRadius: 7}]},
+  options: {plugins: {legend: {display: false}}, scales: {y: {beginAtZero: true, ticks: {precision: 0}}}}
+});
+if (document.getElementById("attendanceChart")) new Chart(document.getElementById("attendanceChart"), {
+  type: "line", data: {labels: attendanceLabels, datasets: [{label: "Present", data: attendanceValues, borderColor: "#167d83", backgroundColor: "rgba(22,125,131,.12)", fill: true, tension: .35}]},
+  options: {plugins: {legend: {display: false}}, scales: {y: {beginAtZero: true, ticks: {precision: 0}}}}
+});
+</script>
+{% endblock %}

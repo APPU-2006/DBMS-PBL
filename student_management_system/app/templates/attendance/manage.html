@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Manage attendance{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">DAILY CLASS REGISTER</div><h1>Mark attendance</h1><p class="muted">Late is not counted as present in attendance percentage calculations.</p></div><a class="btn btn-light" href="{{ url_for('attendance.list_attendance') }}">View records</a></div>
+<div class="panel-card mb-4"><form method="get" class="filter-bar"><select name="course_id" class="form-select" required aria-label="Select course"><option value="">Select course</option>{% for course in courses %}<option value="{{ course.id }}" {{ 'selected' if selected_course == course.id else '' }}>{{ course.course_code }} — {{ course.course_name }}</option>{% endfor %}</select><input name="attendance_date" type="date" class="form-control" value="{{ selected_date.isoformat() }}" required aria-label="Attendance date"><button class="btn btn-primary" type="submit">Load students</button></form></div>
+{% if selected_course %}
+<div class="panel-card"><div class="panel-heading"><div><h2>Attendance for {{ selected_date.strftime('%d %B %Y') }}</h2><p>{{ students|length }} active students</p></div></div>
+{% if students %}<form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="course_id" value="{{ selected_course }}"><input type="hidden" name="attendance_date" value="{{ selected_date.isoformat() }}">
+  <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Student</th><th>Status</th><th>Remarks</th></tr></thead><tbody>
+  {% for student in students %}{% set record = student.attendance_for_day %}<tr><td><strong>{{ student.full_name }}</strong><small class="d-block muted">{{ student.student_id }}</small></td><td><select class="form-select attendance-select" name="status_{{ student.id }}" required aria-label="Attendance status for {{ student.full_name }}"><option value="present" {{ 'selected' if not record or record.status == 'present' else '' }}>Present</option><option value="absent" {{ 'selected' if record and record.status == 'absent' else '' }}>Absent</option><option value="late" {{ 'selected' if record and record.status == 'late' else '' }}>Late</option></select></td><td><input class="form-control" name="remarks_{{ student.id }}" value="{{ record.remarks if record else '' }}" maxlength="255" aria-label="Remarks for {{ student.full_name }}"></td></tr>{% endfor %}
+  </tbody></table></div><div class="form-actions"><button class="btn btn-primary" type="submit"><i class="bi bi-check2-circle me-1"></i> Save attendance</button></div>
+</form>{% else %}<div class="empty-state"><i class="bi bi-people"></i><strong>No active students in this course</strong><span>Enroll active students before taking attendance.</span></div>{% endif %}</div>
+{% endif %}
+{% endblock %}

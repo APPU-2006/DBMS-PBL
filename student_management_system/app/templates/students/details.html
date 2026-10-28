@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}{{ student.full_name }}{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">STUDENT PROFILE</div><h1>{{ student.full_name }}</h1><p class="muted">{{ student.student_id }} · {{ student.course.course_name }}</p></div><div><a class="btn btn-light" href="{{ url_for('students.list_students') }}">Back</a> <a class="btn btn-primary" href="{{ url_for('students.edit_student', student_pk=student.id) }}">Edit details</a></div></div>
+<div class="row g-4"><div class="col-lg-7"><div class="panel-card"><h2 class="section-title">Personal information</h2><dl class="detail-grid"><dt>Email</dt><dd>{{ student.email }}</dd><dt>Phone</dt><dd>{{ student.phone or 'Not provided' }}</dd><dt>Date of birth</dt><dd>{{ student.date_of_birth or 'Not provided' }}</dd><dt>Gender</dt><dd>{{ student.gender or 'Not provided' }}</dd><dt>Address</dt><dd>{{ student.address or 'Not provided' }}</dd><dt>Status</dt><dd>{{ student.status|title }}</dd></dl></div></div>
+<div class="col-lg-5"><div class="panel-card"><h2 class="section-title">Enrollment</h2><dl class="detail-grid"><dt>Course</dt><dd>{{ student.course.course_name }}</dd><dt>Department</dt><dd>{{ student.course.department.department_name }}</dd><dt>Admission date</dt><dd>{{ student.admission_date.strftime('%d %b %Y') }}</dd></dl><a class="btn btn-outline-primary btn-sm" href="{{ url_for('attendance.student_summary', student_pk=student.id) }}">Attendance summary</a></div></div></div>
+{% endblock %}
